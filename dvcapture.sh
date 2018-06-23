@@ -4,10 +4,10 @@
 sourceidlabel="SourceID"
 
 #container format to use (use avi,mkv, or mov)
-container="mov"
+container="mkv"
 
 #declare directory for packages of dv files to be written to during processing
-CACHE_DIR=/home/archive-dv/Desktop/dvgrabs
+CACHE_DIR=/home/dvcapture/Videos/dvgrabs
 
 #name of the log for dvgrab process data
 DVLOG=dvgrab_capture.log
@@ -17,8 +17,8 @@ DVLOG=dvgrab_capture.log
 #enter technical defaults
 CaptureDeviceSoftware="ffmpeg,dv_capture.sh version 0.2"
 PlaybackDeviceManufacturer="Sony"
-PlaybackDeviceModel="DSR-11"
-PlaybackDeviceSerialNo="93313"
+PlaybackDeviceModel="HVR-M15AU"
+PlaybackDeviceSerialNo="011884"
 Interface="IEEE 1394"
 
 
@@ -141,7 +141,7 @@ done
 answer=`offerChoice "How should the tape be prepared?: " "PrepareMethod" "'Full repack then start' 'Rewind then start' 'Start from current position'"`
 echo "$answer" >> "$tmplog"
 prepanswer=`echo "$answer" | cut -d: -f2`
-if [ "$prepanswer" = "Full repack then start" ] ; then
+if [ "$prepanswer" = " Full repack then start" ] ; then
     dvcont stop
     echo "Fast Forwarding..."
     dvcont ff
@@ -150,7 +150,7 @@ if [ "$prepanswer" = "Full repack then start" ] ; then
     dvcont rewind
     (stat=$(dvcont status); while [[ "$stat" != "Winding stopped" ]]; do sleep 2; stat=$(dvcont status); done)
 
-elif [ "$prepanswer" = "Rewind then start" ] ; then
+elif [ "$prepanswer" = " Rewind then start" ] ; then
     dvcont stop
     echo "Rewinding..."
     dvcont rewind
@@ -200,7 +200,7 @@ if [ -f "$file" ] ; then
 	dvanalyzer </dev/null --XML "$file"  > "$outputdir/${filename%.*}_dvanalyzer.xml"
 	xsltproc "$scriptdir/dvanalyzer.xsl" "$outputdir/${filename%.*}_dvanalyzer.xml" > "$outputdir/${filename%.*}_dvanalyzer_summary.txt"
 	echo Plotting results...
-	echo "set terminal svg size 1920, 1080
+	echo "set terminal svg size 1920, 1080 enhanced background rgb 'white'
 	set border 0
 	set datafile separator ','
 	set output '$outputdir/${filename%.*}${count}_dvanalyzer.svg'
