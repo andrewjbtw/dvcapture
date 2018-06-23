@@ -8,7 +8,7 @@ container="mkv"
 
 #declare directory for packages of dv files to be written to during processing
 CACHE_DIR=/home/dvcapture/Videos/dvgrabs
-
+CACHE_DIR=/tmp
 #name of the log for dvgrab process data
 DVLOG=dvgrab_capture.log
 
@@ -113,6 +113,24 @@ echo
 answer=`ask "Please enter the Source ID: " "$sourceidlabel"`
 echo "$answer" >> "$tmplog"
 id=`echo "$answer" | cut -d: -f2 | sed 's/ //g'`
+answer=`ask "Please enter the tape number: " "Tape number"`
+echo "$answer" >> "$tmplog"
+tape_number=`echo "$answer" | cut -d: -f2 | sed 's/ //g'`
+base_video_filename=${id}-02-${tape_number}-src
+echo "Filename will be $base_video_filename.[extension]"
+
+# check for existing fle wth the same name
+for file in "$CACHE_DIR/${id}/objects/${id}-02-${tape_number}-src."*
+do
+    if [ -e "$file" ]
+    then
+        echo "File(s) found with matching id and tape number!"
+        ls -lh "$CACHE_DIR/${id}/objects/${id}-02-${tape_number}-src."*
+        exit
+    fi
+done
+
+
 answer=`offerChoice "Please enter the tape format: " "SourceFormat" "'DVCam' 'miniDV' 'DVCPRO'"`
 echo "$answer" >> "$tmplog"
 echo
@@ -158,10 +176,6 @@ elif [ "$prepanswer" = " Rewind then start" ] ; then
 fi
 
 packageid=`cat "$tmplog" | grep "$sourceidlabel" | cut -d: -f2 | sed 's/ //g'`
-if [ -d "$CACHE_DIR/$packageid" ] ; then
-   echo "The directory $CACHE_DIR/$packageid already exists. Please delete the directory and try again or do not ingest it again."
-   exit
-fi
 
 startingtime=$(date +"%Y-%m-%dT%T%z")
 echo "starting to set up ingest package for $packageid"
@@ -169,14 +183,16 @@ echo "If the video on the tape ends AND the timecode stops incrementing below, t
 
 #set up package
 mkdir -p "$CACHE_DIR/$packageid" "$CACHE_DIR/$packageid/objects" "$CACHE_DIR/$packageid/logs" "$CACHE_DIR/$packageid/metadata/submissionDocumentation"
+
 #checking dir existence
 if [ ! -d "$CACHE_DIR/$packageid" ]; then	
    echo "ERROR:$CACHE_DIR/$packageid does not exist and could not be corrected."
    exit 1
 fi
+
 mv "$tmplog" "$CACHE_DIR/$packageid/metadata/submissionDocumentation/$OPLOG"
 echo starting capturing tape...
-dvgrab -f raw -showstatus -size 0 "$CACHE_DIR/$packageid/objects/${packageid}_.dv" 2>&1 | tee "$CACHE_DIR/$packageid/metadata/submissionDocumentation/${DVLOG}"
+dvgrab -f raw -showstatus -size 0 "$CACHE_DIR/$packageid/objects/${base_video_filename}.dv" 2>&1 | tee "$CACHE_DIR/$packageid/metadata/submissionDocumentation/${DVLOG}"
 #trap '	
 echo finished capturing tape...
 dvcont rewind &
@@ -189,7 +205,7 @@ scriptdir=`dirname "$0"`
 package="$CACHE_DIR/$packageid"
 
 # dvanalyzer analysis
-file=`find "$package/objects" -maxdepth 1 -mindepth 1 -type f -name "*v" ! -name ".*"`
+file=`find "$package/objects" -maxdepth 1 -mindepth 1 -type f \( -name "${base_video_filename}.dv" -o -name "${base_video_filename}.m2t" \)`
 filename=`basename "$file"`
 if [ -f "$file" ] ; then
 	outputdir="$package/metadata/submissionDocumentation/${filename%.*}_analysis"
@@ -227,14 +243,7 @@ fi
 
 # rewrap dv file to container
 cd "$package/objects/"
-for dvfile in *.dv ; do
-    if [ -f "$dvfile" ] ; then
-        ffmpeg -i "$dvfile" -map 0 -c copy "${dvfile%.*}.${container}"
-        if [ "$?" = "0" ] ; then
-            rm "$dvfile"
-        fi
-    fi
-done
+ffmpeg -i "$file" -map 0 -c copy "${file%.*}.${container}"
 
 #md5deep on objects
 md5deep -retl "$package/objects/" > "$package/metadata/checksum.txt"
