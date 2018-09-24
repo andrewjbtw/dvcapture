@@ -117,7 +117,7 @@ echo "Interface: $Interface" >> "$tmplog"
 answer=`ask "Please enter the Operator name: " "Operator"`
 echo "$answer" >> "$tmplog"
 echo
-answer=`ask "Please enter the Source ID: " "$sourceidlabel"`
+answer=`ask "Please enter the catalog number: " "$catalog_number"`
 echo "$answer" >> "$tmplog"
 id=`echo "$answer" | cut -d: -f2 | sed 's/ //g'`
 answer=`ask "Please enter the tape number: " "Tape number"`
