@@ -4,10 +4,14 @@
 sourceidlabel="SourceID"
 
 #container format to use (use avi,mkv, or mov)
-container="mkv"
+#choosing mov as default for capture because it seems to clear up potential audio sync issues that cpature to dv, avi, and mkv don't resolve
+container="mov"
 
 #declare directory for packages of dv files to be written to during processing
-CACHE_DIR=/home/dvcapture/Videos/dvgrabs
+
+# commented out for testing
+#CACHE_DIR=/home/dvcapture/Videos/dvgrabs
+
 CACHE_DIR=/tmp
 #name of the log for dvgrab process data
 DVLOG=dvgrab_capture.log
@@ -27,7 +31,7 @@ OPLOG=ingest_operator.log
 EXPECTED_NUM_ARGS=0
 
 deps(){
-        DEPENDENCIES="dvgrab dvanalyzer gnuplot ffmpeg md5deep"
+        DEPENDENCIES="dvgrab dvanalyzer gnuplot ffmpeg md5deep dvcont"
  
         deps_ok=YES
         for dep in $DEPENDENCIES ; do
@@ -46,6 +50,7 @@ deps(){
                 return 0
         fi
 }
+
 ask(){
 	# This function requires 3 arguments
 	# 1) A prompt
@@ -57,6 +62,7 @@ ask(){
     	echo "${2}: ${response}"
     fi
 }
+
 offerChoice(){
 	# This function requires 3 arguments
 	# 1) A prompt
@@ -73,13 +79,14 @@ offerChoice(){
 }
 
 if [ $# -ne $EXPECTED_NUM_ARGS ] ; then
-   output_help
+   echo "dvcapture is meant to be run interactively. Please do not enter arguments on the command line."
    exit 0
 fi
 
 deps
 
-dvstatus=`dvcont status`
+# check if DV deck is connected
+dvstatus=$(dvcont status)
 if [ "$?" = "1" ] ; then
 	echo "The DV deck is not found. Make sure the FireWire is attached correctly and that the deck is on."
 	exit 1
@@ -181,8 +188,8 @@ startingtime=$(date +"%Y-%m-%dT%T%z")
 echo "starting to set up ingest package for $packageid"
 echo "If the video on the tape ends AND the timecode stops incrementing below, then please press STOP on the deck to end the capture."
 
-#set up package
-mkdir -p "$CACHE_DIR/$packageid" "$CACHE_DIR/$packageid/objects" "$CACHE_DIR/$packageid/logs" "$CACHE_DIR/$packageid/metadata/submissionDocumentation"
+#set up package to match Archivematica ingest structure
+mkdir -p "$CACHE_DIR/$packageid" "$CACHE_DIR/$packageid/objects" "$CACHE_DIR/$packageid/metadata/submissionDocumentation"
 
 #checking dir existence
 if [ ! -d "$CACHE_DIR/$packageid" ]; then	
@@ -191,6 +198,9 @@ if [ ! -d "$CACHE_DIR/$packageid" ]; then
 fi
 
 mv "$tmplog" "$CACHE_DIR/$packageid/metadata/submissionDocumentation/$OPLOG"
+
+# tape capture section
+
 echo starting capturing tape...
 dvgrab -f raw -showstatus -size 0 "$CACHE_DIR/$packageid/objects/${base_video_filename}.dv" 2>&1 | tee "$CACHE_DIR/$packageid/metadata/submissionDocumentation/${DVLOG}"
 #trap '	
@@ -205,6 +215,7 @@ scriptdir=`dirname "$0"`
 package="$CACHE_DIR/$packageid"
 
 # dvanalyzer analysis
+
 file=`find "$package/objects" -maxdepth 1 -mindepth 1 -type f \( -name "${base_video_filename}.dv" -o -name "${base_video_filename}.m2t" \)`
 filename=`basename "$file"`
 if [ -f "$file" ] ; then
@@ -241,11 +252,5 @@ else
 	echo "ERROR - $name is not a file"
 fi
 
-# rewrap dv file to container
-cd "$package/objects/"
-ffmpeg -i "$file" -map 0 -c copy "${file%.*}.${container}"
-
 #md5deep on objects
 md5deep -retl "$package/objects/" > "$package/metadata/checksum.txt"
-
-#' 0
