@@ -196,7 +196,7 @@ echo ""
 echo "If the video on the tape ends AND the timecode stops incrementing below, then please press STOP on the deck to end the capture."
 
 #set up package to match Archivematica ingest structure
-log_dir="$capture_dir/$catalog_number/metadata/submissionDocumentation/logs"
+log_dir="$capture_dir/$catalog_number/metadata/submissionDocumentation/capture-logs"
 object_dir="$capture_dir/$catalog_number/objects"
 mkdir -p "$object_dir" "$log_dir"
 
