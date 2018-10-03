@@ -119,28 +119,38 @@ answer=`ask "Please enter the tape number: " "Tape number"`
 echo "$answer" >> "$tmplog"
 tape_number=`echo "$answer" | cut -d: -f2 | sed 's/ //g'`
 
+# file name without extension
 # extension will be determined when dvgrab runs
 # extension could be "mov" or "m2t" depending on tape type
-
 base_video_filename=${catalog_number}-02-${tape_number}-src
-capture_base=$capture_dir/$catalog_number/objects/${base_video_filename}
 
-#keep logs for each tape captured
+# objects directory where video files will be placed
+# matches CHM folder structure for SIPs
+object_dir="$capture_dir/$catalog_number/objects/$catalog_number" 
+capture_base="$object_dir"/${base_video_filename}
+
+# directory to keep logs
+# matches metadata/submissionDocumentation structure from Archivematica SIP
+log_dir="$capture_dir/$catalog_number/metadata/submissionDocumentation/capture-logs/${base_video_filename}"
+
+# filenames for logs
 DVLOG=dvgrab_capture-${base_video_filename}.log
 OPLOG=ingest_operator-${base_video_filename}.log
+
+#check for existing file at same path
+if [ -f "$capture_base.mov" ] || [ -f "$capture_base.m2t" ]
+then
+    echo "File(s) found with matching catalog number and tape number!"
+    ls -lh "$object_dir"
+    exit
+fi
+
 
 
 echo "Filename will be ${base_video_filename}.${container}"
 echo "File will be created at the following path: $capture_base.[extension]"
 echo ""
 
-#check for existing file at same path
-if [ -f "$capture_base.mov" ] || [ -f "$capture_base.m2t" ]
-then
-    echo "File(s) found with matching catalog number and tape number!"
-    ls -lh "$capture_dir/${catalog_number}/objects/${catalog_number}-02-${tape_number}-src."*
-    exit
-fi
 
 answer=`offerChoice "Please enter the tape format: " "SourceFormat" "'DVCam' 'miniDV' 'DVCPRO'"`
 echo "$answer" >> "$tmplog"
@@ -196,8 +206,6 @@ echo ""
 echo "If the video on the tape ends AND the timecode stops incrementing below, then please press STOP on the deck to end the capture."
 
 #set up package to match Archivematica ingest structure
-log_dir="$capture_dir/$catalog_number/metadata/submissionDocumentation/capture-logs"
-object_dir="$capture_dir/$catalog_number/objects"
 mkdir -p "$object_dir" "$log_dir"
 
 #copy log data to ingest package directory
