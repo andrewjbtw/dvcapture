@@ -235,11 +235,16 @@ echo "startingtime=$startingtime" >> "$log_dir/$OPLOG"
 echo "endingtime=$endingtime" >> "$log_dir/$OPLOG"
 echo done with "$capture_file"
 
+#md5deep on objects
+md5deep -etl "$capture_file" > "$capture_dir/$catalog_number/metadata/submissionDocumentation/md5-${base_video_filename}.txt"
+
+## script can be split here to separate capture from QC
+
 # dvanalyzer analysis
 
-if ( echo "$capture_file" | grep "\.m2t$")
+if ( echo "$capture_file" | grep "\.m2t$") # checks for ".m2t" extension
 then
-    echo "This is an HDV file. Skipping dvanalyzer."
+    echo "This is an .m2t file. Skipping dvanalyzer." # dvanalyzer doesn't run on .m2t
 else
     scriptdir=`dirname "$0"`
     filename=`basename "$capture_file"`
@@ -277,6 +282,3 @@ else
 	    echo "ERROR - $name is not a DV file"
     fi
 fi
-
-#md5deep on objects
-md5deep -etl "$capture_file" > "$capture_dir/$catalog_number/metadata/submissionDocumentation/md5-${base_video_filename}.txt"
