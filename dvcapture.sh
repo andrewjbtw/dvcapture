@@ -246,4 +246,4 @@ echo done with "$capture_file"
 # dvanalyzer analysis
 # call separate QC script
 
-./qc.sh "$capture_file" "$log_dir"
+./dvanalyze.sh "$capture_file" "$log_dir"
