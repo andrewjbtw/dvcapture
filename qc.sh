@@ -4,7 +4,7 @@
 # Takes a single file path as an input and outputs a report as a text file in the submission documentation folder.
 
 # base path to location for captured files
-capture_dir=/storage/dvgrabs
+capture_dir=/media/storage/dvgrabs
 
 echo "Enter the catalog number:"
 read catnum
@@ -18,8 +18,10 @@ video_file=$package_path/objects/$catnum/$catnum-02-$tapenum-src.$container # pa
 file_name=$catnum-02-$tapenum-src.$container # name of file being QC-ed
 documentation_path=$package_path/metadata/submissionDocumentation/$catnum-02-$tapenum-src 
 dvanalysis_path=$documentation_path/$catnum-02-$tapenum-src_analysis
+QC_log=$package_path/metadata/submissionDocumentation/$catnum-qc.csv
 
 
+# Check if file exists
 if [ ! -f "$video_file" ]
 then
     echo "No video file found for catalog number "$catnum", tape "$tapenum"."
@@ -27,6 +29,7 @@ then
     exit 1
 fi
     
+# If the file is DV, check if dvanalyzer has been run and open the chart for QC
 if [ "$container" = "m2t" ]
 then
     echo "This is an m2t file. No dvanalyzer graph was created."
@@ -41,11 +44,11 @@ else
     fi    
 fi
     
-    
+# Note significant errors that should be reviewed by a person (audible or visible issues)
+# Examples: "Many audio errors found in first 10 minutes."
+# Create QC log file. Log file will be one per package, not one per tape
+echo "Catalog number,tape number,dvanalyzer summary,notes" > "$QC_log"
+xdg-open "$QC_log"
 
 
-# Note significant errors to check for
-# Examples: "Many 
 # Open video file
-
-# 

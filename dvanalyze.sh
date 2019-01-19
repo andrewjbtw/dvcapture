@@ -3,6 +3,7 @@
 capture_file=$1
 log_dir=$2
 
+# todo: validate file and folder input
 
 if ( echo "$capture_file" | grep "\.m2t$") # checks for ".m2t" extension
 then
