@@ -7,11 +7,11 @@
 capture_dir=/media/storage/dvgrabs
 
 echo "Enter the catalog number:"
-read catnum
+read -r catnum
 echo "Enter the tape number:"
-read tapenum
-echo "Enter the container [generally "mov" or "m2t"]:"
-read container
+read -r tapenum
+echo "Enter the container [generally 'mov' or 'm2t']:"
+read -r container
 
 package_path=$capture_dir/$catnum # where all files from each set of tapes is stored
 video_file=$package_path/objects/$catnum/$catnum-02-$tapenum-src.$container # path to file being QC-ed
@@ -24,7 +24,7 @@ QC_log=$package_path/metadata/submissionDocumentation/$catnum-qc.csv
 # Check if file exists
 if [ ! -f "$video_file" ]
 then
-    echo "No video file found for catalog number "$catnum", tape "$tapenum"."
+    echo "No video file found for catalog number $catnum, tape $tapenum."
     echo "$video_file"
     exit 1
 fi

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # dvanalyzer analysis
 
 capture_file=$1
@@ -9,8 +11,8 @@ if ( echo "$capture_file" | grep "\.m2t$") # checks for ".m2t" extension
 then
     echo "This is an .m2t file. Skipping dvanalyzer." # dvanalyzer doesn't run on .m2t
 else
-    scriptdir=`dirname "$0"`
-    filename=`basename "$capture_file"`
+    scriptdir=$(dirname "$0")
+    filename=$(basename "$capture_file")
     if [ -f "$capture_file" ] ; then
 	    outputdir="$log_dir/${filename%.*}_analysis"
             if [ ! -d "$outputdir" ] ; then
@@ -23,7 +25,7 @@ else
 	    echo "set terminal svg size 1920, 1080 enhanced background rgb 'white'
 	    set border 0
 	    set datafile separator ','
-	    set output '$outputdir/${filename%.*}${count}_dvanalyzer.svg'
+	    set output '$outputdir/${filename%.*}_dvanalyzer.svg'
 	    set multiplot layout 4, 1 title 'DV Analyzer Graphs of $filename'
 	    set style fill solid border -1
 	    set xrange [ 0: ]
@@ -42,6 +44,6 @@ else
 	    echo Done
 	    fi
     else
-	    echo "ERROR - $name is not a DV file"
+	    echo "ERROR - $capture_file is not a DV file"
     fi
 fi

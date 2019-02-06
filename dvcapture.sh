@@ -30,10 +30,10 @@ deps(){
  
         deps_ok=YES
         for dep in $DEPENDENCIES ; do
-                if [ ! $(which $dep) ] ; then
+                if [ ! "$(which "$dep")" ] ; then
                         echo -e "This script requires $dep to run but it is not installed"
                         echo -e "If you are running ubuntu or debian you might be able to install $dep with the following command"
-                        echo -e "sudo apt-get install $dep"
+                        echo -e "sudo apt install $dep"
                         deps_ok=NO
                 fi
         done
@@ -50,7 +50,7 @@ ask(){
 	# This function requires 3 arguments
 	# 1) A prompt
 	# 2) The label for the metadata value
-    read -ep "$1" response
+    read -epr "$1" response
     if [ -z "$response" ] ; then
     	ask "$1" "$2"
     else
@@ -95,7 +95,7 @@ echo "PlaybackDeviceModel: $PlaybackDeviceModel"
 echo "PlaybackDeviceSerialNo: $PlaybackDeviceSerialNo"
 echo "Interface: $Interface"
 echo
-answer=`offerChoice "Do these values match your setup: " "setupcorrect" "'Yes' 'No'"`
+answer=$(offerChoice "Do these values match your setup: " "setupcorrect" "'Yes' 'No'")
 if [ "$answer" == "setupcorrect: No" ] ; then
     echo "Please edit these values in the header of $0 and rerun."
     exit
@@ -109,15 +109,15 @@ echo "PlaybackDeviceModel: $PlaybackDeviceModel" >> "$tmplog"
 echo "PlaybackDeviceSerialNo: $PlaybackDeviceSerialNo" >> "$tmplog"
 echo "Interface: $Interface" >> "$tmplog"
 
-answer=`ask "Please enter the Operator name: " "Operator"`
+answer=$(ask "Please enter the Operator name: " "Operator")
 echo "$answer" >> "$tmplog"
 echo
-answer=`ask "Please enter the catalog number: " "catalog_number"`
+answer=$(ask "Please enter the catalog number: " "catalog_number")
 echo "$answer" >> "$tmplog"
-catalog_number=`echo "$answer" | cut -d: -f2 | sed 's/ //g'`
-answer=`ask "Please enter the tape number: " "Tape number"`
+catalog_number=$(echo "$answer" | cut -d: -f2 | sed 's/ //g')
+answer=$(ask "Please enter the tape number: " "Tape number")
 echo "$answer" >> "$tmplog"
-tape_number=`echo "$answer" | cut -d: -f2 | sed 's/ //g'`
+tape_number=$(echo "$answer" | cut -d: -f2 | sed 's/ //g')
 
 # file name without extension
 # extension will be determined when dvgrab runs
@@ -152,36 +152,36 @@ echo "File will be created at the following path: $capture_base.[extension]"
 echo ""
 
 
-answer=`offerChoice "Please enter the tape format: " "SourceFormat" "'DVCam' 'miniDV' 'DVCPRO'"`
+answer=$(offerChoice "Please enter the tape format: " "SourceFormat" "'DVCam' 'miniDV' 'DVCPRO'")
 echo "$answer" >> "$tmplog"
 echo
 
-answer=`offerChoice "Please enter the tape cassette brand: " "CassetteBrand" "'Sony' 'Panasonic' 'JVC' 'Maxell' 'Fujifilm'"`
+answer=$(offerChoice "Please enter the tape cassette brand: " "CassetteBrand" "'Sony' 'Panasonic' 'JVC' 'Maxell' 'Fujifilm'")
 echo "$answer" >> "$tmplog"
 echo
 
-answer=`ask "Please enter the Cassette Product No. (example: DVM60, 124, 126L): " "CassetteProductNo"`
+answer=$(ask "Please enter the Cassette Product No. (example: DVM60, 124, 126L): " "CassetteProductNo")
 echo "$answer" >> "$tmplog"
 echo
 
-answer=`ask "Please enter the tape condition: " "CassetteCondition"`
+answer=$(ask "Please enter the tape condition: " "CassetteCondition")
 echo "$answer" >> "$tmplog"
 echo
 
-dvstatus=`dvcont status`
+dvstatus=$(dvcont status)
 while [ "$dvstatus" = "Loading Medium" ] ; do 
-    echo -n "Insert cassette: # ${id}, hit [q] to quit, or any key to continue. "
-    read insert_response
+    echo -n "Insert cassette, hit [q] to quit, or any key to continue. "
+    read -r insert_response
     if [ "$insert_response" = "q" ] ; then
     	exit 1
     else
-    	dvstatus=`dvcont status`
+        dvstatus=$(dvcont status)
     fi
 done
 
-answer=`offerChoice "How should the tape be prepared?: " "PrepareMethod" "'Full repack then start' 'Rewind then start' 'Start from current position'"`
+answer=$(offerChoice "How should the tape be prepared?: " "PrepareMethod" "'Full repack then start' 'Rewind then start' 'Start from current position'")
 echo "$answer" >> "$tmplog"
-prepanswer=`echo "$answer" | cut -d: -f2`
+prepanswer=$(echo "$answer" | cut -d: -f2)
 if [ "$prepanswer" = " Full repack then start" ] ; then
     dvcont stop
     echo "Fast Forwarding..."
@@ -198,7 +198,7 @@ elif [ "$prepanswer" = " Rewind then start" ] ; then
     (stat=$(dvcont status); while [[ "$stat" != "Winding stopped" ]]; do sleep 2; stat=$(dvcont status); done)
 fi
 
-packageid=`cat "$tmplog" | grep "$sourceidlabel" | cut -d: -f2 | sed 's/ //g'`
+packageid=$(grep "$sourceidlabel" "$tmplog" | cut -d: -f2 | sed 's/ //g')
 
 startingtime=$(date +"%Y-%m-%dT%T%z")
 echo "Adding tape $tape_number to ingest package for $catalog_number ..."
@@ -236,7 +236,7 @@ dvcont rewind &
 endingtime=$(date +"%Y-%m-%dT%T%z")
 echo "startingtime=$startingtime" >> "$log_dir/$OPLOG"
 echo "endingtime=$endingtime" >> "$log_dir/$OPLOG"
-echo done with "$capture_file"
+echo "done with $capture_file"
 
 # open subshell to cd into objects directory and run md5deep using relative path)
 (cd "$object_dir" ; md5deep -el "$(basename "$capture_file")" > "$capture_dir/$catalog_number/metadata/submissionDocumentation/${base_video_filename}.md5")
