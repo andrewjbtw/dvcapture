@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Interactively generates a quality control log.
-# Takes a single file path as an input and outputs a report as a text file in the submission documentation folder.
+# Takes a single file path as an input and outputs a report as a csv text file in the submission documentation folder.
 
 # base path to location for captured files
 capture_dir=/media/storage/dvgrabs
@@ -50,5 +50,5 @@ fi
 echo "Catalog number,tape number,dvanalyzer summary,notes" > "$QC_log"
 xdg-open "$QC_log"
 
-
 # Open video file
+vlc "$video_file"
