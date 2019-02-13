@@ -50,7 +50,7 @@ ask(){
 	# This function requires 3 arguments
 	# 1) A prompt
 	# 2) The label for the metadata value
-    read -epr "$1" response
+    read -erp "$1" response
     if [ -z "$response" ] ; then
     	ask "$1" "$2"
     else
