@@ -6,6 +6,11 @@ capture_file=$1
 log_dir=$2
 
 # todo: validate file and folder input
+if [ ! -d "$log_dir" ]
+then
+    echo "$log_dir" not found
+    exit 1
+fi
 
 if ( echo "$capture_file" | grep "\.m2t$") # checks for ".m2t" extension
 then
