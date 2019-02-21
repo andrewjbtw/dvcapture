@@ -61,7 +61,7 @@ if [ -f "$QC_log" ]
 then
     echo "Opening existing QC log."
 else
-    echo "Catalog number,tape number,dvanalyzer summary,notes" >> "$QC_log"
+    echo "Catalog number,Tape number,DV Analyzer summary,A/V sync issues?,Notes" >> "$QC_log"
     echo "Opening QC log."
 fi
 
