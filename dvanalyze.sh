@@ -42,10 +42,10 @@ else
 	    set xtics format '%H:%M:%S'
 	    set xtics nomirror
 	    plot '$outputdir/${filename%.*}_dvanalyzer_summary.txt' u (\$1/29.97):(\$2) title 'Video Error Concealment (percentage)' lt 1 with impulses 
-	    plot '' u (\$1/30):(\$3) title 'Channel 1 Audio Error (percentage)' lt 2 with impulses
-	    plot '' u (\$1/30):(\$4) title 'Channel 2 Audio Error (percentage)' lt 3 with impulses 
+	    plot '' u (\$1/29.97):(\$3) title 'Channel 1 Audio Error (percentage)' lt 2 with impulses
+	    plot '' u (\$1/29.97):(\$4) title 'Channel 2 Audio Error (percentage)' lt 3 with impulses 
 	    set yrange [ -100:100 ]
-	    plot '' u (\$1/30):(\$5) title 'Audio Error Head Difference' lt 4 with impulses" | gnuplot
+	    plot '' u (\$1/29.97):(\$5) title 'Audio Error Head Difference' lt 4 with impulses" | gnuplot
 	    echo Done
 	    fi
     else
