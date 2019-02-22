@@ -72,11 +72,11 @@ else
             mkdir -pv "$capture_log_path"
         fi
         ./dvanalyze.sh "$video_file" "$capture_log_path"
-        echo "Opening dvanalyzer graph ..."
-        xdg-open "$dvanalysis_path/$catnum-02-$tapenum-src_dvanalyzer.svg"
+        echo "Opening dvanalyzer graph for $video_file ..."
+        xdg-open "$dvanalysis_path/$catnum-02-$tapenum-src_dvanalyzer.svg" 2>/dev/null
     else
-        echo "Opening dvanalyzer graph ..."
-        xdg-open "$dvanalysis_path/$catnum-02-$tapenum-src_dvanalyzer.svg"
+        echo "Opening dvanalyzer graph for $video_file ..."
+        xdg-open "$dvanalysis_path/$catnum-02-$tapenum-src_dvanalyzer.svg" 2</dev/null
     fi    
 fi
 
