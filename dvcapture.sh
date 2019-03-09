@@ -145,7 +145,7 @@ fi
 
 
 
-echo "Filename will be ${base_video_filename}.${container}"
+echo "Filename will be ${base_video_filename}.mov or ${base_video_filename}.m2t depending on the video format"
 echo "File will be created at the following path: $capture_base.[extension]"
 echo ""
 
