@@ -113,6 +113,19 @@ echo
 answer=$(ask "Please enter the catalog number: " "catalog_number")
 echo "$answer" >> "$tmplog"
 catalog_number=$(echo "$answer" | cut -d: -f2 | sed 's/ //g')
+
+# show basic descriptive metadata as a check against data entry errors
+echo -e "\nSearching for descriptive metadata for $catalog_number : \n"
+xmlstarlet sel -N x="urn:crystal-reports:schemas:report-detail" -t -m "x:CrystalReport/x:Details/x:Section[x:Field[@Name='IDNUMBER1']/x:Value = '$catalog_number']/x:Field" -v "concat(@Name,' : ',x:Value)" -n ingest-metadata.xml
+echo -e "\nIf this is not correct, enter 'q' to quit and re-enter metadata. Or press enter to continue."
+read wrong_metadata
+if [ "$wrong_metadata" == 'q' ]
+then
+    echo "Quitting."
+    exit
+fi 
+
+
 answer=$(ask "Please enter the tape number: " "Tape number")
 echo "$answer" >> "$tmplog"
 tape_number=$(echo "$answer" | cut -d: -f2 | sed 's/ //g')
@@ -142,8 +155,6 @@ then
     ls -lh "$object_dir"
     exit
 fi
-
-
 
 echo "Filename will be ${base_video_filename}.mov or ${base_video_filename}.m2t depending on the video format"
 echo "File will be created at the following path: $capture_base.[extension]"
