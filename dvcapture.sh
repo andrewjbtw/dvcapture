@@ -177,42 +177,13 @@ answer=$(ask "Please enter the tape condition: " "CassetteCondition")
 echo "$answer" >> "$tmplog"
 echo
 
-dvstatus=$(dvcont status)
-while [ "$dvstatus" = "Loading Medium" ] ; do 
-    echo -n "Insert cassette, hit [q] to quit, or any key to continue. "
-    read -r insert_response
-    if [ "$insert_response" = "q" ] ; then
-    	exit 1
-    else
-        dvstatus=$(dvcont status)
-    fi
-done
-
 answer=$(offerChoice "How should the tape be prepared?: " "PrepareMethod" "'Full repack then start' 'Rewind then start' 'Start from current position'")
 echo "$answer" >> "$tmplog"
 prepanswer=$(echo "$answer" | cut -d: -f2)
-#if [ "$prepanswer" = " Full repack then start" ] ; then
-#    dvcont stop
-#    echo "Fast Forwarding..."
-#    dvcont ff
-#    (stat=$(dvcont status); while [[ "$stat" != "Winding stopped" ]]; do sleep 2; stat=$(dvcont status); done)
-#    echo "Rewinding..."
-#    dvcont rewind
-#    (stat=$(dvcont status); while [[ "$stat" != "Winding stopped" ]]; do sleep 2; stat=$(dvcont status); done)
-
-#elif [ "$prepanswer" = " Rewind then start" ] ; then
-#    dvcont stop
-#    echo "Rewinding..."
-#    dvcont rewind
-#    (stat=$(dvcont status); while [[ "$stat" != "Winding stopped" ]]; do sleep 2; stat=$(dvcont status); done)
-#fi
-
 packageid=$(grep "$sourceidlabel" "$tmplog" | cut -d: -f2 | sed 's/ //g')
 
 startingtime=$(date +"%Y-%m-%dT%T%z")
-echo "Adding tape $tape_number to ingest package for $catalog_number ..."
-#echo ""
-#echo "If the video on the tape ends AND the timecode stops incrementing below, then please press STOP on the deck to end the capture."
+echo -e "Adding tape $tape_number to ingest package for $catalog_number ...\n"
 
 #set up package to match Archivematica ingest structure
 mkdir -p "$object_dir" "$log_dir"
@@ -220,19 +191,8 @@ mkdir -p "$object_dir" "$log_dir"
 #copy log data to ingest package directory
 mv "$tmplog" "$log_dir/$OPLOG"
 
-
-
 # tape capture section
 ./control_deck.sh "$object_dir" "$base_video_filename" "$log_dir" "$prepanswer"
-
-#echo "starting tape capture"
-
-# enter subshell to change to object directory for tape transfer
-# avoids encoding full path to file to DVLOG and makes it easier to read real-time stats during capture
-#(cd "$object_dir" ; dvgrab -f raw -showstatus -size 0 "${base_video_filename}_.mov" 2>&1 | tee "$log_dir/${DVLOG}")
-
-#trap '	
-#echo "finished capturing tape..."
 
 dvgrab_file="$(find "$object_dir" -type f -name "$base_video_filename*_*")"
 if [ "$(echo "$dvgrab_file" | wc -l)" -ne 1 ] # check if dvgrab produced anything other than a single file
@@ -253,8 +213,6 @@ echo "done with $capture_file"
 
 # open subshell to cd into objects directory and run md5deep using relative path)
 (cd "$object_dir" ; md5deep -el "$(basename "$capture_file")" > "$capture_dir/$catalog_number/metadata/submissionDocumentation/${base_video_filename}.md5")
-
-## script can be split here to separate capture from QC
 
 # dvanalyzer analysis
 
