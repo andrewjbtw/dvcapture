@@ -128,13 +128,13 @@ catalog_number=$(echo "$answer" | cut -d: -f2 | sed 's/ //g')
 echo -e "\nSearching for descriptive metadata for $catalog_number : \n"
 xmlstarlet sel -N x="urn:crystal-reports:schemas:report-detail" -t -m "x:CrystalReport/x:Details/x:Section[x:Field[@Name='IDNUMBER1']/x:Value = '$catalog_number']/x:Field" -v "concat(@Name,' : ',x:Value)" -n ingest-metadata.xml
 
+echo -e "\nIs this the correct item?"
 confirm_metadata=$(yesorno)
 if [ "$confirm_metadata" == 'n' ]
 then
     echo "Quitting."
     exit
-fi 
-
+fi
 
 answer=$(ask "Please enter the tape number: " "Tape number")
 echo "$answer" >> "$tmplog"
@@ -168,7 +168,6 @@ fi
 echo "Filename will be ${base_video_filename}.mov or ${base_video_filename}.m2t depending on the video format"
 echo "File will be created at the following path: $capture_base.[extension]"
 echo ""
-
 
 answer=$(offerChoice "Please enter the tape format: " "SourceFormat" "'DVCam' 'miniDV' 'DVCPRO'")
 echo "$answer" >> "$tmplog"
