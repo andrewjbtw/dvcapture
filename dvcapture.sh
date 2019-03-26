@@ -1,18 +1,12 @@
 #!/bin/bash
 
-#declare the label of the identifier associated with the ingest and resulting package. Other labels are declared directly in the use of the ask and offerChoice functions below.
-sourceidlabel="SourceID"
-
-#container format to use (use avi,mkv, or mov)
-#choosing mov as default for capture because it seems to clear up potential audio sync issues that cpature to dv, avi, and mkv don't resolve
-container="mov"
-
-#declare directory for packages of dv files to be written to during processing
-
-# commented out for testing
+# tape capture directory
+# this is where the video files are created by dvgrab
 capture_dir=/home/dvcapture/Videos/dvgrabs
 
-#CACHE_DIR=/tmp
+# file storage directory
+# this is where files are stored after capture
+storage_dir=/media/storage/dvgrabs
 
 #enter technical defaults
 CaptureDeviceSoftware="ffmpeg,dvcapture.sh, CHM version"
@@ -71,6 +65,21 @@ offerChoice(){
 	echo "${label}: ${option}"
 }
 
+yesorno(){
+# this function prompts users to enter 'y' or 'n' until they do
+while true
+do
+    read -rp "(y/n): " choice
+    case "$choice" in
+        y|Y ) echo "y"
+            return ;;
+        n|N ) echo "n"
+            return ;;
+        * ) continue ;;
+    esac
+done
+}
+
 if [ $# -ne $EXPECTED_NUM_ARGS ] ; then
    echo "dvcapture is meant to be run interactively. Please do not enter arguments on the command line."
    exit 0
@@ -79,7 +88,6 @@ fi
 deps
 
 # check if DV deck is connected
-dvstatus=$(dvcont status)
 if [ "$?" = "1" ] ; then
 	echo "The DV deck is not found. Make sure the FireWire is attached correctly and that the deck is on."
 	exit 1
@@ -117,9 +125,9 @@ catalog_number=$(echo "$answer" | cut -d: -f2 | sed 's/ //g')
 # show basic descriptive metadata as a check against data entry errors
 echo -e "\nSearching for descriptive metadata for $catalog_number : \n"
 xmlstarlet sel -N x="urn:crystal-reports:schemas:report-detail" -t -m "x:CrystalReport/x:Details/x:Section[x:Field[@Name='IDNUMBER1']/x:Value = '$catalog_number']/x:Field" -v "concat(@Name,' : ',x:Value)" -n ingest-metadata.xml
-echo -e "\nIf this is not correct, enter 'q' to quit and re-enter metadata. Or press enter to continue."
-read wrong_metadata
-if [ "$wrong_metadata" == 'q' ]
+
+confirm_metadata=$(yesorno)
+if [ "$confirm_metadata" == 'n' ]
 then
     echo "Quitting."
     exit
@@ -144,8 +152,7 @@ capture_base="$object_dir"/${base_video_filename}
 # matches metadata/submissionDocumentation structure from Archivematica SIP
 log_dir="$capture_dir/$catalog_number/metadata/submissionDocumentation/${base_video_filename}"
 
-# filenames for logs
-DVLOG=dvgrab_capture-${base_video_filename}.log
+# log for each run of dvcapture.sh
 OPLOG=ingest_operator-${base_video_filename}.log
 
 #check for existing file at same path
@@ -180,7 +187,6 @@ echo
 answer=$(offerChoice "How should the tape be prepared?: " "PrepareMethod" "'Full repack then start' 'Rewind then start' 'Start from current position'")
 echo "$answer" >> "$tmplog"
 prepanswer=$(echo "$answer" | cut -d: -f2)
-packageid=$(grep "$sourceidlabel" "$tmplog" | cut -d: -f2 | sed 's/ //g')
 
 startingtime=$(date +"%Y-%m-%dT%T%z")
 echo -e "Adding tape $tape_number to ingest package for $catalog_number ...\n"
@@ -215,5 +221,7 @@ echo "done with $capture_file"
 (cd "$object_dir" ; md5deep -el "$(basename "$capture_file")" > "$capture_dir/$catalog_number/metadata/submissionDocumentation/${base_video_filename}.md5")
 
 # dvanalyzer analysis
-
 ./dvanalyze.sh "$capture_file" "$log_dir"
+
+# rsync current capture files to storage directory
+rsync -rvh --times --itemize-changes --progress "$capture_dir"/"$catalog_number" "$storage_dir"
