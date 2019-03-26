@@ -88,6 +88,8 @@ fi
 deps
 
 # check if DV deck is connected
+echo "Checking for DV deck ..."
+dvcont status 2>/dev/null # This is just to check if dvcont can find the deck, not to get exact output.
 if [ "$?" = "1" ] ; then
 	echo "The DV deck is not found. Make sure the FireWire is attached correctly and that the deck is on."
 	exit 1
