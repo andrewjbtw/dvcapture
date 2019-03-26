@@ -9,6 +9,8 @@ object_dir=$1
 base_video_filename=$2
 log_dir=$3
 prepanswer=$4
+
+# log for the dvgrab output
 DVLOG=dvgrab_capture-${base_video_filename}.log
 
 deps(){
@@ -67,10 +69,6 @@ while [ "$dvstatus" = "Loading Medium" ] ; do
         dvstatus=$(dvcont status)
     fi
 done
-
-#answer=$(offerChoice "How should the tape be prepared?: " "PrepareMethod" "'Full repack then start' 'Rewind then start' 'Start from current position'")
-#echo "$answer" >> "$tmplog"
-#prepanswer=$(echo "$answer" | cut -d: -f2)
 
 if [ "$prepanswer" = " Full repack then start" ] ; then
     dvcont stop
