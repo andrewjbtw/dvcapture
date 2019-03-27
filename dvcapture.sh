@@ -18,7 +18,7 @@ Interface="IEEE 1394"
 EXPECTED_NUM_ARGS=0
 
 deps(){
-        DEPENDENCIES="dvgrab dvanalyzer gnuplot ffmpeg md5deep dvcont"
+        DEPENDENCIES="dvgrab dvanalyzer gnuplot ffmpeg md5deep dvcont xsltproc"
  
         deps_ok=YES
         for dep in $DEPENDENCIES ; do
@@ -89,7 +89,7 @@ deps
 
 # check if DV deck is connected
 echo "Checking for DV deck ..."
-dvcont status 2>/dev/null # This is just to check if dvcont can find the deck, not to get exact output.
+dvcont status 1>/dev/null # Standard output is discarded because this is just a check for errors.
 if [ "$?" = "1" ] ; then
 	echo "The DV deck is not found. Make sure the FireWire is attached correctly and that the deck is on."
 	exit 1
@@ -212,7 +212,6 @@ capture_file=${dvgrab_file/_001/}
 echo "stripping suffix from dvgrab-generated filename"
 mv -v "$dvgrab_file" "$capture_file"
 
-#dvcont rewind &
 endingtime=$(date +"%Y-%m-%dT%T%z")
 echo "startingtime=$startingtime" >> "$log_dir/$OPLOG"
 echo "endingtime=$endingtime" >> "$log_dir/$OPLOG"
@@ -225,4 +224,5 @@ echo "done with $capture_file"
 ./dvanalyze.sh "$capture_file" "$log_dir"
 
 # rsync current capture files to storage directory
+echo -e "\nCopying files to storage drive ..."
 rsync -rvh --times --itemize-changes --progress "$capture_dir"/"$catalog_number" "$storage_dir"
