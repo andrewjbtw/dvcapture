@@ -9,6 +9,7 @@ object_dir=$1
 base_video_filename=$2
 log_dir=$3
 prepanswer=$4
+duration=$5
 
 # log for the dvgrab output
 DVLOG=dvgrab_capture-${base_video_filename}.log
@@ -34,19 +35,12 @@ deps(){
         fi
 }
 
-offerChoice(){
-	# This function requires 3 arguments
-	# 1) A prompt
-	# 2) The label for the metadata value
-	# 3) A vocabulary list
-	PS3="$1"
-	label="$2"
-	eval set "$3"
-	select option in "$@"
-	do
-		break
-	done
-	echo "${label}: ${option}"
+errorExit(){
+
+    message=$1
+    echo "$message"
+    echo "Exiting ..."
+    exit 1
 }
 
 # check for dependencies
@@ -57,6 +51,33 @@ dvstatus=$(dvcont status)
 if [ "$?" = "1" ] ; then
 	echo "The DV deck is not found. Make sure the FireWire is attached correctly and that the deck is on."
 	exit 1
+fi
+
+# check for object directory (i.e. where the video file will be created)
+if [ ! -d "$object_dir" ]
+then
+    errorExit "Objects directory $object_dir not found!"
+fi
+
+if [ ! -d "$log_dir" ]
+then
+    errorExit "Log directory $log_dir not found!"
+fi
+
+# check if a duration has been supplied
+if [ ! -z "$duration" ]
+then
+    has_duration=true
+
+    # validate duration format
+    if [[ "$duration" =~ ^[0-9][0-9]:[0-5][0-9]:[0-5][0-9]$ ]] 
+    then
+        echo "duration is valid"
+    else
+        errorExit "Duration $duration is not valid. Please enter duration as HH:MM:SS"
+    fi
+else
+    has_duration=false
 fi
 
 dvstatus=$(dvcont status)
@@ -91,8 +112,15 @@ echo "If the video on the tape ends AND the timecode stops incrementing below, t
 echo "Starting tape capture ..."
 
 # enter subshell to change to object directory for tape transfer
-# avoids encoding full path to file to DVLOG and makes it easier to read real-time stats during capture
-(cd "$object_dir" ; dvgrab -f raw -showstatus -size 0 "${base_video_filename}_.mov" 2>&1 | tee "$log_dir/${DVLOG}")
+# avoids encoding the full path to the file to DVLOG and makes it easier to read real-time stats during capture
 
-echo "finished capturing tape..."
-dvcont rewind &
+if [ "$has_duration" == false ]
+then
+    echo "running without duration"
+    (cd "$object_dir" && dvgrab -f raw -showstatus -size 0 "${base_video_filename}_.mov" 2>&1 | tee "$log_dir/${DVLOG}") || errorExit "Error: Video capture failed."
+    dvcont rewind &
+else
+    (cd "$object_dir" && dvgrab -f raw -showstatus -size 0 -d "$duration" "${base_video_filename}_.mov" 2>&1 | tee "$log_dir/${DVLOG}") || errorExit "Error: Video capture failed."
+fi
+
+echo "finished capture ..."
