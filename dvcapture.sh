@@ -42,6 +42,7 @@ ask(){
 	# This function requires 3 arguments
 	# 1) A prompt
 	# 2) The label for the metadata value
+    # This prompt is for a free text response
     read -erp "$1" response
     if [ -z "$response" ] ; then
     	ask "$1" "$2"
@@ -55,6 +56,7 @@ offerChoice(){
 	# 1) A prompt
 	# 2) The label for the metadata value
 	# 3) A vocabulary list
+    # This function sets up a menu of options
 	PS3="$1"
 	label="$2"
 	eval set "$3"
@@ -108,6 +110,9 @@ if [ "$answer" == "setupcorrect: No" ] ; then
     echo "Please edit these values in the header of $0 and rerun."
     exit
 fi
+
+# Create log in temporary location so log file isn't kept if script quits early
+# TODO: clean up log file if early exit
 
 tmplog=/tmp/dv_capture
 touch "$tmplog"
