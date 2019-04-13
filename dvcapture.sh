@@ -59,12 +59,20 @@ offerChoice(){
     # This function sets up a menu of options
 	PS3="$1"
 	label="$2"
-	eval set "$3"
-	select option in "$@"
+    choices_csv=$3
+    IFS=',' read -a choices <<< "$choices_csv"
+
+	select option in "${choices[@]}"
 	do
-		break
+        if [ "$REPLY" -gt 0 2>/dev/null ] && [ "$REPLY" -le ${#choices[@]} 2>/dev/null ]
+        then
+        break
+    else
+        echo "You entered $REPLY" >&2
+        echo "Please choose a number from the list." >&2
+    fi	
 	done
-	echo "${label}: ${option}"
+	   echo "${label}: ${option}"
 }
 
 yesorno(){
@@ -82,16 +90,24 @@ do
 done
 }
 
+errorExit(){
+
+    message=$1
+    echo "$message"
+    echo "Exiting ..."
+    exit 1
+}
+
 if [ $# -ne $EXPECTED_NUM_ARGS ] ; then
    echo "dvcapture is meant to be run interactively. Please do not enter arguments on the command line."
    exit 0
 fi
 
-deps
+#deps
 
 # check if DV deck is connected
 echo "Checking for DV deck ..."
-dvcont status 1>/dev/null # Standard output is discarded because this is just a check for errors.
+#dvcont status 1>/dev/null # Standard output is discarded because this is just a check for errors.
 if [ "$?" = "1" ] ; then
 	echo "The DV deck is not found. Make sure the FireWire is attached correctly and that the deck is on."
 	exit 1
@@ -105,7 +121,7 @@ echo "PlaybackDeviceModel: $PlaybackDeviceModel"
 echo "PlaybackDeviceSerialNo: $PlaybackDeviceSerialNo"
 echo "Interface: $Interface"
 echo
-answer=$(offerChoice "Do these values match your setup: " "setupcorrect" "'Yes' 'No'")
+answer=$(offerChoice "Do these values match your setup: " "setupcorrect" "Yes,No")
 if [ "$answer" == "setupcorrect: No" ] ; then
     echo "Please edit these values in the header of $0 and rerun."
     exit
@@ -174,11 +190,11 @@ echo "Filename will be ${base_video_filename}.mov or ${base_video_filename}.m2t 
 echo "File will be created at the following path: $capture_base.[extension]"
 echo ""
 
-answer=$(offerChoice "Please enter the tape format: " "SourceFormat" "'DVCam' 'miniDV' 'DVCPRO'")
+answer=$(offerChoice "Please enter the tape format: " "SourceFormat" "DVCam,miniDV,DVCPRO")
 echo "$answer" >> "$tmplog"
 echo
 
-answer=$(offerChoice "Please enter the tape cassette brand: " "CassetteBrand" "'Sony' 'Panasonic' 'JVC' 'Maxell' 'Fujifilm'")
+answer=$(offerChoice "Please enter the tape cassette brand: " "CassetteBrand" "Sony,Panasonic,JVC,Maxell,Fujifilm")
 echo "$answer" >> "$tmplog"
 echo
 
@@ -190,7 +206,7 @@ answer=$(ask "Please enter the tape condition: " "CassetteCondition")
 echo "$answer" >> "$tmplog"
 echo
 
-answer=$(offerChoice "How should the tape be prepared?: " "PrepareMethod" "'Full repack then start' 'Rewind then start' 'Start from current position'")
+answer=$(offerChoice "How should the tape be prepared?: " "PrepareMethod" "Full repack then start,Rewind then start,Start from current position")
 echo "$answer" >> "$tmplog"
 prepanswer=$(echo "$answer" | cut -d: -f2)
 
@@ -204,7 +220,7 @@ mkdir -p "$object_dir" "$log_dir"
 mv "$tmplog" "$log_dir/$OPLOG"
 
 # tape capture section
-./control_deck.sh "$object_dir" "$base_video_filename" "$log_dir" "$prepanswer"
+./control_deck.sh "$object_dir" "$base_video_filename" "$log_dir" "$prepanswer" || errorExit "Something went wrong during tape capture."
 
 dvgrab_file="$(find "$object_dir" -type f -name "$base_video_filename*_*")"
 if [ "$(echo "$dvgrab_file" | wc -l)" -ne 1 ] # check if dvgrab produced anything other than a single file
