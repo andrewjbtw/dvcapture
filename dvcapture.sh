@@ -103,6 +103,17 @@ if [ $# -ne $EXPECTED_NUM_ARGS ] ; then
    exit 0
 fi
 
+cleanUp(){
+    if [ -f /tmp/dv_capture ]
+    then
+        echo -e "\ndvcapture.sh: Cleaning up temporary log file."
+        rm -v /tmp/dv_capture
+    fi
+}
+
+trap cleanUp EXIT
+
+
 #deps
 
 # check if DV deck is connected
@@ -112,6 +123,7 @@ if [ "$?" = "1" ] ; then
 	echo "The DV deck is not found. Make sure the FireWire is attached correctly and that the deck is on."
 	exit 1
 fi
+
 
 # setting static process metadata
 echo
