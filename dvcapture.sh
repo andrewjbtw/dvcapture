@@ -114,11 +114,11 @@ cleanUp(){
 trap cleanUp EXIT
 
 
-#deps
+deps
 
 # check if DV deck is connected
 echo "Checking for DV deck ..."
-#dvcont status 1>/dev/null # Standard output is discarded because this is just a check for errors.
+dvcont status 1>/dev/null # Standard output is discarded because this is just a check for errors.
 if [ "$?" = "1" ] ; then
 	echo "The DV deck is not found. Make sure the FireWire is attached correctly and that the deck is on."
 	exit 1
