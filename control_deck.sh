@@ -5,11 +5,41 @@
 # 2. filename base pattern
 # 3. logging directory
 
-object_dir=$1
-base_video_filename=$2
-log_dir=$3
-prepanswer=$4
-duration=$5
+usage ()
+{
+    echo 'Usage : control-deck.sh -f <filename> -o <objects directory> -l <log directory> -p <preparation setting> [ -d <duration> ] '
+    exit
+}
+
+if [ "$#" -eq 0 ]
+then
+    usage
+fi
+
+while [ "$1" != "" ]
+do
+    case "$1" in
+        -f )    shift
+                base_video_filename=$1
+                ;;
+        -o )    shift
+                object_dir=$1
+                ;;
+        -l )    shift
+                log_dir=$1
+                ;;
+        -p )    shift
+                preparation=$1
+                ;;
+        -d )    shift
+                duration=$1
+                ;;
+        * )     echo "Unknown option '$1' found! Quitting ..."
+                exit
+                ;;
+    esac
+    shift
+done
 
 # log for the dvgrab output
 DVLOG=dvgrab_capture-${base_video_filename}.log
@@ -68,11 +98,10 @@ fi
 if [ ! -z "$duration" ]
 then
     has_duration=true
-
     # validate duration format
     if [[ "$duration" =~ ^[0-9][0-9]:[0-5][0-9]:[0-5][0-9]$ ]] 
     then
-        echo "duration is valid"
+        echo "Capturing a duration of $duration"
     else
         errorExit "Duration $duration is not valid. Please enter duration as HH:MM:SS"
     fi
@@ -91,7 +120,7 @@ while [ "$dvstatus" = "Loading Medium" ] ; do
     fi
 done
 
-if [ "$prepanswer" = " Full repack then start" ] ; then
+if [ "$preparation" = "repack" ] ; then
     dvcont stop
     echo "Fast Forwarding..."
     dvcont ff
@@ -100,11 +129,15 @@ if [ "$prepanswer" = " Full repack then start" ] ; then
     dvcont rewind
     (stat=$(dvcont status); while [[ "$stat" != "Winding stopped" ]]; do sleep 2; stat=$(dvcont status); done)
 
-elif [ "$prepanswer" = " Rewind then start" ] ; then
+elif [ "$preparation" = "rewind" ] ; then
     dvcont stop
     echo "Rewinding..."
     dvcont rewind
     (stat=$(dvcont status); while [[ "$stat" != "Winding stopped" ]]; do sleep 2; stat=$(dvcont status); done)
+
+elif [ "$preparation" = "continue" ] ; then
+    dvcont stop
+    echo "Starting from current position..."
 fi
 
 # tape capture section

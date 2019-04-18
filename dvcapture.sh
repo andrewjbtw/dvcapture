@@ -57,14 +57,19 @@ offerChoice(){
 	# 2) The label for the metadata value
 	# 3) A vocabulary list
     # This function sets up a menu of options
+
+    # WARNING: The option choices must be input as a CSV, but this is a bare minimum implementation,
+    # meaning it simply splits on any comma. If an option needs to include a comma, this function will
+    # need to be updated to handle that case.
 	PS3="$1"
 	label="$2"
     choices_csv=$3
-    IFS=',' read -a choices <<< "$choices_csv"
+    IFS=',' read -r -a choices <<< "$choices_csv" # create an array to hold the choices
 
 	select option in "${choices[@]}"
 	do
-        if [ "$REPLY" -gt 0 2>/dev/null ] && [ "$REPLY" -le ${#choices[@]} 2>/dev/null ]
+        if [ "$REPLY" -gt 0 ] && [ "$REPLY" -le ${#choices[@]} ]
+#        if [ "$REPLY" -gt 0 2>/dev/null ] && [ "$REPLY" -le ${#choices[@]} 2>/dev/null ]
         then
         break
     else
@@ -169,6 +174,7 @@ then
     exit
 fi
 
+echo ""
 answer=$(ask "Please enter the tape number: " "Tape number")
 echo "$answer" >> "$tmplog"
 tape_number=$(echo "$answer" | cut -d: -f2 | sed 's/ //g')
@@ -220,10 +226,41 @@ echo
 
 answer=$(offerChoice "How should the tape be prepared?: " "PrepareMethod" "Full repack then start,Rewind then start,Start from current position")
 echo "$answer" >> "$tmplog"
-prepanswer=$(echo "$answer" | cut -d: -f2)
+
+# reduce the response to one word for easier processing later in the script
+case "$answer" in
+    "PrepareMethod: Full repack then start" ) preparation="repack"
+        ;;
+    "PrepareMethod: Rewind then start" ) preparation="rewind"
+        ;;
+    "PrepareMethod: Start from current position" ) preparation="continue"
+        ;;
+esac
+
+# if the user selects continue, check if they want to set a duration
+# a common use case for continue is a tape with multiple distinct videos on it
+if [ "$preparation" == "continue" ]
+then
+    echo -e "\nDo you want to set a fixed duration for the recording?"
+    set_duration=$(yesorno)
+    if [ "$set_duration" == "y" ]
+    then
+        echo -e "\nEnter the duration in the form of HH:MM:SS"
+        while true
+        do
+            read -rp "Duration: " duration
+            if [[ "$duration" =~ ^[0-9][0-9]:[0-5][0-9]:[0-5][0-9]$ ]]
+            then
+                break
+            else
+                echo "Duration $duration is not valid. Please enter duration as HH:MM:SS"
+            fi
+        done
+    fi
+fi
 
 startingtime=$(date +"%Y-%m-%dT%T%z")
-echo -e "Adding tape $tape_number to ingest package for $catalog_number ...\n"
+echo -e "\nAdding tape $tape_number to ingest package for $catalog_number ...\n"
 
 #set up package to match Archivematica ingest structure
 mkdir -p "$object_dir" "$log_dir"
@@ -232,7 +269,7 @@ mkdir -p "$object_dir" "$log_dir"
 mv "$tmplog" "$log_dir/$OPLOG"
 
 # tape capture section
-./control_deck.sh "$object_dir" "$base_video_filename" "$log_dir" "$prepanswer" || errorExit "Something went wrong during tape capture."
+./control_deck.sh -o "$object_dir" -f "$base_video_filename" -l "$log_dir" -p "$preparation" -d "$duration" || errorExit "Something went wrong during tape capture."
 
 dvgrab_file="$(find "$object_dir" -type f -name "$base_video_filename*_*")"
 if [ "$(echo "$dvgrab_file" | wc -l)" -ne 1 ] # check if dvgrab produced anything other than a single file
