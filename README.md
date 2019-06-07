@@ -1,16 +1,16 @@
 A set of bash scripts for transferring DV and HDV tape content to files on a Linux-based system.
 
-#Description#
+# Description
 
 If you need to capture data from DV or HDV tape onto a computer using the Firewire connection, these scripts might help you out. They were created to make it possible to transfer tapes to files using the bash command-line to control the deck, capture the data, run a minimal set of QC processes using DV Analyzer, and create packages for archival storage.
 
-#The scripts#
+# The scripts
 
 There are four scripts in all, two of which are specific to the working context in which they were created (the Computer History Museum), and two of which I've tried to make as generalizable as possible. My hope is that anyone can run the core *control-deck.sh* and *dvanalyze.sh* scripts, which can be called from other scripts or run independently. 
 
 The other two scripts (*dvcapture.sh* and *qc.sh*) are interactive and can be seen as wrappers around the core scripts. These would have to be modified to fit your environment, as they enforce certain local metadata and naming conventions. But they could be useful examples of what it is possible to do.
 
-###control-deck.sh####
+### control-deck.sh
 This controls the tape deck and uses dvgrab to capture data to a file. 
 
 control-deck.sh takes the following arguments:
@@ -51,13 +51,13 @@ Optional:
 
 Optionally, set a duration. This should take the form of HH:MM:SS. Note that this is a length of time to record, not a timestamp of the ending point.
 
-###dvanalyze.sh###
+### dvanalyze.sh
 
 Analyzes a DV file using DV Analyzer. 
 
 
 
 
-#Acknowledgements#
+# Acknowledgements
 
 These scripts are based on Dave Rice's earlier [dvcapture script](https://github.com/dericed/dvcapture "dericed's dvcapture github repository"). The commands to control the tape deck and parse the DV Analyzer output into an SVG chart are largely unchanged from that script.
