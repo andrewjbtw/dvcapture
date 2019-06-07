@@ -9,7 +9,7 @@ capture_dir=/home/dvcapture/Videos/dvgrabs
 storage_dir=/media/storage/dvgrabs
 
 #enter technical defaults
-CaptureDeviceSoftware="ffmpeg,dvcapture.sh, CHM version"
+CaptureDeviceSoftware="dvcapture.sh, CHM version"
 PlaybackDeviceManufacturer="Sony"
 PlaybackDeviceModel="HVR-M15AU"
 PlaybackDeviceSerialNo="011884"
@@ -18,7 +18,7 @@ Interface="IEEE 1394"
 EXPECTED_NUM_ARGS=0
 
 deps(){
-        DEPENDENCIES="dvgrab dvanalyzer gnuplot ffmpeg md5deep dvcont xsltproc"
+        DEPENDENCIES="dvgrab dvanalyzer gnuplot md5deep dvcont xsltproc"
  
         deps_ok=YES
         for dep in $DEPENDENCIES ; do

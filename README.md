@@ -23,9 +23,9 @@ Required parameters:
 
 *-f filename* (the name of the file to be created)
 
-Do not include an extension with the filename. The script will attempt to capture DV to an MOV container by supplying the ".mov" extension in the dvgrab command. Based on testing, this seemed to be the most reliable container format to handle audio-video synchronization problems on tapes that have large number of audio errors. Other containers such as MKV and AVI resulted in files with audio-video synchronization drift. This could potentially be made configurable in the future.
+Do not include an extension with the filename. The script will attempt to capture DV to an MOV container by supplying the ".mov" extension in the dvgrab command. Based on testing, this seemed to be the most reliable container format to handle audio-video synchronization problems on tapes that have a large number of audio errors. Other containers such as MKV and AVI resulted in files with audio-video synchronization drift when tested on the same set of tapes. The container could potentially be made configurable in the future.
 
-Additional notes:
+Additional notes on filenaming:
 
 dvgrab will insert a numerical suffix into the file name. This seems to be done in order to handle situations where more than one file is created during the same capture process. There doesn't seem to be a way to prevent this, so you will have to modify the file name yourself in post-processing if you do not want the suffix.
 
@@ -35,7 +35,7 @@ If the tape is HDV rather than DV, dvgrab will still try to capture the data, bu
 
 *-o object directory*
 
-This is the directory where the video file should be created. The term "object" here comes from Archivematica's archival information package terminology, as the original goal in creating these scripts was to create archival packages for use with Archivematica.
+This is the directory where the video file should be created. The term "object" here comes from [Archivematica](http://www.archivematica.org "Archivematica home page")'s archival information package terminology, as the original goal in creating these scripts was to create archival packages for use with Archivematica.
 
 *-l log directory*
 
@@ -45,9 +45,9 @@ Directory where the dvgrab log should be stored.
 
 Instructions on how the tape should be prepared before transfer. The options are:
 
-repack -- fast-forward to the end and then rewind
-rewind -- rewind from current position
-continue -- start from current position
+- repack -- fast-forward to the end and then rewind
+- rewind -- rewind from current position
+- continue -- start from current position
 
 Optional:
 
@@ -95,7 +95,7 @@ This script eases the process of quality control checking. It requires the file 
 
 To run qc.sh, you must supply a catalog number and a tape number. This can be done either interactively or on the command line:
 ```
-qc.sh -c <catalog id> -t <tape number (zero padded)>
+qc.sh -c <catalog number> -t <tape number (zero padded)>
 ```
 
 qc.sh will then:
@@ -103,16 +103,16 @@ qc.sh will then:
 - Check if DV Analyzer has already been run on the given file
 - If not, check if the file is DV
 - If the file is DV, run DV Analyzer
-- If the file is not DV (i.e. it's HDV), output that information to the screen
+- If the file is not DV (i.e. it's HDV), explain why there's no dvanalyze.sh outputs to view
 - Open the DV Analyzer output chart (if a DV file) for inspection 
-- Open a CSV file for the reviewer to input QC information. This will be saved to the package.
+- Open a CSV file for the reviewer to input QC information -- this file will be saved to the package
 - Open the video file in VLC for viewing
 
-Note: there is still a "legacy" option in the code to run DV Analyzer only and not proceed with the rest of QC. But that's now been superceded by the separation of dvanalyze.sh into its own standalone script for this purpose. The option is likely to be removed soon.
+Note: there is still a "legacy" option in the code to run DV Analyzer only and not proceed with the rest of QC. That's now been superceded by the separation of dvanalyze.sh into its own standalone script for this purpose. The option is likely to be removed soon.
 
 # Dependencies
 
-These scripts rely on a lot of other tools. The biggest dependency might be Linux. It's not clear if it's possible to run dvgrab on OSX. It might be possible to run many of these scripts, except qc.sh since that requires a GUI, under a Linux subsystem on Windows 10, but that would depend on whether the Linux installation can access a firewire connection under Windows.
+These scripts rely on a lot of other tools. The biggest dependency might be Linux. It's not clear if it's possible to run dvgrab on Mac OS X. It might be possible to run many of these scripts under a Linux subsystem on Windows 10, but that would depend on whether the Linux installation can access a firewire connection under Windows. Also, Windows 10 doesn't support graphical applications under Linux, though it may in the future.
 
 In any case, these scripts have only been tested on Ubuntu, versions 14.04, 16.04, and 18.04.
 

@@ -45,7 +45,7 @@ done
 DVLOG=dvgrab_capture-${base_video_filename}.log
 
 deps(){
-        DEPENDENCIES="dvgrab dvanalyzer gnuplot ffmpeg md5deep dvcont"
+        DEPENDENCIES="dvgrab dvanalyzer gnuplot md5deep dvcont"
  
         deps_ok=YES
         for dep in $DEPENDENCIES ; do

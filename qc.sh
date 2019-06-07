@@ -8,7 +8,7 @@ capture_dir=/media/storage/dvgrabs
 
 usage ()
 {
-    echo 'Usage : qc.sh -c <catalog id> -t <tape number (zero padded)> [--analyze-only]'
+    echo 'Usage : qc.sh -c <catalog number> -t <tape number (zero padded)> [--analyze-only]'
     exit
 }
 
