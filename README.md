@@ -15,9 +15,9 @@ This controls the tape deck and uses dvgrab to capture data to a file.
 
 Usage : 
 
-'''
+```
 control-deck.sh -f <filename> -o <objects directory> -l <log directory> -p <preparation setting> [ -d <duration> ]
-'''
+```
 
 Required:
 
