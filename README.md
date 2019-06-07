@@ -13,7 +13,11 @@ The other two scripts (*dvcapture.sh* and *qc.sh*) are interactive and can be se
 ### control-deck.sh
 This controls the tape deck and uses dvgrab to capture data to a file. 
 
-Usage : <code>control-deck.sh -f <filename> -o <objects directory> -l <log directory> -p <preparation setting> [ -d <duration> ] </code>
+Usage : 
+
+'''
+control-deck.sh -f <filename> -o <objects directory> -l <log directory> -p <preparation setting> [ -d <duration> ]
+'''
 
 Required:
 
