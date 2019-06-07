@@ -19,7 +19,7 @@ Usage :
 control-deck.sh -f <filename> -o <objects directory> -l <log directory> -p <preparation setting> [ -d <duration> ]
 ```
 
-Required:
+Required parameters:
 
 *-f filename* (the name of the file to be created)
 
@@ -57,15 +57,82 @@ Optionally, set a duration. This should take the form of HH:MM:SS. Note that thi
 
 ### dvanalyze.sh
 
-Analyzes a DV file using DV Analyzer. The file "dvanalyzer.xsl" must be included in the same directory.
+Analyzes a DV file using [DV Analyzer](https://mediaarea.net/DVAnalyzer DV Analyzer home page). The file "dvanalyzer.xsl" must be included in the same directory as the script.
 
-Usage: dvanalyze.sh
+Usage: 
+```
+dvanalyze.sh capture_file log_directory
+```
 
+The analysis will produce both an XML file with the DV Analyzer output, and an SVG chart displaying where audio and video errors occur along the file's timeline. This can be quite useful for guiding where to focus QC efforts.
 
+### dvcapture.sh
 
+This is an interactive script and should not be called with any arguments. Some of its features are highly specific to the Computer History Museum's environment, such as its handling of metadata, file-naming conventions, and folder structure. As such, you will need to modify it to adapt it to your own workflows.
 
+This script takes a small number of inputs:
 
+- Catalog number
+- Tape number
+- Tape brand and type
+- Tape condition
+- Preparation instructions (repack, rewind, or continue)
+- (Optional) duration of capture, if not capturing a whole tape
+
+and produces the following outputs:
+
+- A package (folder structure) that corresponds to Archivematica's "[transfer](https://www.archivematica.org/en/docs/archivematica-1.9/user-manual/transfer/transfer/#transfer Archivematica transfer documentation)" package structure, with subfolders for "metadata" and "objects"
+- A copy of each video file
+- Checksums for each video file
+- Logs of the tape capture process
+- For DV files, the dvanalyze.sh outputs for each file
+
+If a multiple tapes are associated together under one catalog number, they are all arranged in the same package. If there is only one tape, the tape number will be "01".
+
+### qc.sh
+
+This script eases the process of quality control checking. It requires the file being reviewed to have been captured using dvcapture.sh, as it relies on files being arranged according to the package structure that script creates.
+
+To run qc.sh, you must supply a catalog number and a tape number. This can be done either interactively or on the command line. 
+
+```
+Usage : qc.sh -c <catalog id> -t <tape number (zero padded)>
+```
+
+qc.sh will then:
+
+- Check if DV Analyzer has already been run on the given file
+- If not, check if the file is DV
+- If the file is DV, run DV Analyzer
+- If the file is not DV (i.e. it's HDV), output that information to the screen
+- Open the DV Analyzer output chart (if a DV file) for inspection 
+- Open a CSV file for the reviewer to input QC information. This will be saved to the package.
+- Open the video file in VLC for viewing
+
+Note: there is still a "legacy" option in the code to run DV Analyzer only and not proceed with the rest of QC. But that's now been superceded by the separation of dvanalyze.sh into its own standalone script for this purpose. The option is likely to be removed soon.
+
+# Dependencies
+
+These scripts rely on a lot of other tools. The biggest dependency might be Linux. It's not clear if it's possible to run dvgrab on OSX. It might be possible to run many of these scripts, except qc.sh since that requires a GUI, under a Linux subsystem on Windows 10, but that would depend on whether the Linux installation can access a firewire connection under Windows.
+
+In any case, these scripts have only been tested on Ubuntu, versions 14.04, 16.04, and 18.04.
+
+Additional dependencies:
+
+To run control-deck.sh and dvanalyze.sh, you need
+
+- dvgrab - to capture the tape
+- dvcont - to control the deck
+- dvanalyzer - to analyze the DV
+- xsltproc - to process the DV Analyzer XML
+- gnuplot - to create the DV analysis SVG
+
+Additionally, to run dvcapture.sh and qc.sh, you need
+
+- md5deep - to generate the checksum
+- xmlstarlet - to process the museum's metadata XML export
+- vlc - to view the video file
 
 # Acknowledgements
 
-These scripts are based on Dave Rice's earlier [dvcapture script](https://github.com/dericed/dvcapture "dericed's dvcapture github repository"). The commands to control the tape deck and parse the DV Analyzer output into an SVG chart are largely unchanged from that script.
+These scripts are based on Dave Rice's earlier [dvcapture script](https://github.com/dericed/dvcapture "dericed's dvcapture github repository"). The commands to control the tape deck and parse the DV Analyzer output into an SVG chart are largely unchanged from that script. Most of the additions and changes have been for the purpose of adapting that script to the Computer History Museum's workflows.
