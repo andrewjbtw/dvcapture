@@ -1,16 +1,16 @@
 A set of bash scripts for transferring DV and HDV tape content to files on a Linux-based system.
 
-# Introduction
+# Summary
 
 If you need to capture data from DV or HDV tape onto a computer using the Firewire connection, these scripts might help you out. They were created to make it possible to transfer tapes to files using the bash command-line to control the deck, capture the data, run a minimal set of QC processes using DV Analyzer, and create packages for archival storage.
 
-## The scripts
+# The scripts
 
-There are four scripts in all, two of which are specific to the working context in which they were created (the Computer History Museum), and two of which I've tried to make as generalizable as possible. My hope is that anyone can run the core *control-deck.sh* and *dvanalyze.sh* scripts, which can be called from other scripts or run independently. 
+There are four scripts in all, two of which are specific to the working context in which they were created (the Computer History Museum), and two of which I've tried to make as generalizable as possible. My hope is that anyone can run the core **control-deck.sh** and **dvanalyze.sh** scripts, which can be called from other scripts or run independently. 
 
-The other two scripts (*dvcapture.sh* and *qc.sh*) are interactive and can be seen as wrappers around the core scripts. These would have to be modified to fit your environment, as they enforce certain local metadata and naming conventions. But they could be useful examples of what it is possible to do.
+The other two scripts (**dvcapture.sh** and **qc.sh**) are interactive and can be seen as wrappers around the core scripts. These would have to be modified to fit your environment, as they enforce certain local metadata and naming conventions. But they could be useful examples of what it is possible to do.
 
-### control-deck.sh
+#### control-deck.sh
 This controls the tape deck and uses dvgrab to capture data to a file. 
 
 Usage : 
@@ -55,9 +55,9 @@ Optional:
 
 Optionally, set a duration. This should take the form of HH:MM:SS. Note that this is a length of time to record, not a timestamp of the ending point.
 
-### dvanalyze.sh
+#### dvanalyze.sh
 
-Analyzes a DV file using [DV Analyzer](https://mediaarea.net/DVAnalyzer DV Analyzer home page). The file "dvanalyzer.xsl" must be included in the same directory as the script.
+Analyzes a DV file using [DV Analyzer](https://mediaarea.net/DVAnalyzer "DV Analyzer home page"). The file "dvanalyzer.xsl" must be included in the same directory as the script.
 
 Usage: 
 ```
@@ -66,7 +66,7 @@ dvanalyze.sh capture_file log_directory
 
 The analysis will produce both an XML file with the DV Analyzer output, and an SVG chart displaying where audio and video errors occur along the file's timeline. This can be quite useful for guiding where to focus QC efforts.
 
-### dvcapture.sh
+#### dvcapture.sh
 
 This is an interactive script and should not be called with any arguments. Some of its features are highly specific to the Computer History Museum's environment, such as its handling of metadata, file-naming conventions, and folder structure. As such, you will need to modify it to adapt it to your own workflows.
 
@@ -81,7 +81,7 @@ This script takes a small number of inputs:
 
 and produces the following outputs:
 
-- A package (folder structure) that corresponds to Archivematica's "[transfer](https://www.archivematica.org/en/docs/archivematica-1.9/user-manual/transfer/transfer/#transfer Archivematica transfer documentation)" package structure, with subfolders for "metadata" and "objects"
+- A package (folder structure) that corresponds to Archivematica's "[transfer](https://www.archivematica.org/en/docs/archivematica-1.9/user-manual/transfer/transfer/#transfer "Archivematica transfer documentation")" package structure, with subfolders for "metadata" and "objects"
 - A copy of each video file
 - Checksums for each video file
 - Logs of the tape capture process
@@ -89,14 +89,13 @@ and produces the following outputs:
 
 If a multiple tapes are associated together under one catalog number, they are all arranged in the same package. If there is only one tape, the tape number will be "01".
 
-### qc.sh
+#### qc.sh
 
 This script eases the process of quality control checking. It requires the file being reviewed to have been captured using dvcapture.sh, as it relies on files being arranged according to the package structure that script creates.
 
-To run qc.sh, you must supply a catalog number and a tape number. This can be done either interactively or on the command line. 
-
+To run qc.sh, you must supply a catalog number and a tape number. This can be done either interactively or on the command line:
 ```
-Usage : qc.sh -c <catalog id> -t <tape number (zero padded)>
+qc.sh -c <catalog id> -t <tape number (zero padded)>
 ```
 
 qc.sh will then:
