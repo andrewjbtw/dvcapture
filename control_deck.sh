@@ -149,11 +149,11 @@ echo "Starting tape capture ..."
 
 if [ "$has_duration" == false ]
 then
-    echo "running without duration"
+    echo "Capture will run to the end of the tape."
     (cd "$object_dir" && dvgrab -f raw -showstatus -size 0 "${base_video_filename}_.mov" 2>&1 | tee "$log_dir/${DVLOG}") || errorExit "Error: Video capture failed."
     dvcont rewind &
 else
     (cd "$object_dir" && dvgrab -f raw -showstatus -size 0 -d "$duration" "${base_video_filename}_.mov" 2>&1 | tee "$log_dir/${DVLOG}") || errorExit "Error: Video capture failed."
 fi
 
-echo "finished capture ..."
+echo "Finished capture ..."

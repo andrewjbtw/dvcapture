@@ -27,7 +27,7 @@ Do not include an extension with the filename. The script will attempt to captur
 
 Additional notes on filenaming:
 
-dvgrab will insert a numerical suffix into the file name. This seems to be done in order to handle situations where more than one file is created during the same capture process. There doesn't seem to be a way to prevent this, so you will have to modify the file name yourself in post-processing if you do not want the suffix.
+dvgrab will insert a numerical suffix into the filename. This seems to be done in order to handle situations where more than one file is created during the same capture process. There doesn't seem to be a way to prevent this, so you will have to modify the filename yourself in post-processing if you do not want the suffix.
 
 If you do not set a duration, the script will attempt to capture from your starting point to the end of the tape in a single file. If you need multiple files and know the length of the clips you want, you can set a duration (see below) with the optional -d flag.
 
@@ -112,7 +112,7 @@ Note: there is still a "legacy" option in the code to run DV Analyzer only and n
 
 # Dependencies
 
-These scripts rely on a lot of other tools. The biggest dependency might be Linux. It's not clear if it's possible to run dvgrab on Mac OS X. It might be possible to run many of these scripts under a Linux subsystem on Windows 10, but that would depend on whether the Linux installation can access a firewire connection under Windows. Also, Windows 10 doesn't support graphical applications under Linux, though it may in the future.
+These scripts rely on a lot of other tools. The biggest dependency might be Linux. It's not clear if it's possible to run dvgrab on Mac OS X. It might be possible to run many of these scripts under a Linux subsystem on Windows 10, but that would depend on whether the Linux installation can access a Firewire connection under Windows. Also, Windows 10 doesn't support graphical applications under Linux, though it may in the future.
 
 In any case, these scripts have only been tested on Ubuntu, versions 14.04, 16.04, and 18.04.
 
